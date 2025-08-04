@@ -1,5 +1,5 @@
 monolog:
-    channels: [ 'product' ]
+    channels: ['product']
 
     handlers:
         main:
