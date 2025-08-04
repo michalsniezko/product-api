@@ -6,6 +6,7 @@ To run project:
 2. Visit http://localhost:8080/api in your browser or use Postman/Insomnia to test API calls
 3. Visit http://localhost:8025/ in your browser to verify that emails are being sent after adding Products
 4. See `var/log/product.log` for logs related to products.
+5. Run tests: `make test` in the project root directory
 
 See working application:
 

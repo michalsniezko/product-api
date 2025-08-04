@@ -24,3 +24,6 @@ git-safe-dir:
 	$(DOCKER_COMPOSE) exec $(PHP_SERVICE) git config --global --add safe.directory $(PROJECT_DIR)
 
 setup: up git-safe-dir composer-install db-create migrate
+
+test:
+	$(DOCKER_COMPOSE) exec -e APP_ENV=test $(PHP_SERVICE) ./vendor/bin/phpunit -c phpunit.dist.xml
