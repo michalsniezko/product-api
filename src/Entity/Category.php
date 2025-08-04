@@ -26,9 +26,9 @@ class Category
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type:"string", length:10, unique:true)]
+    #[ORM\Column(type: "string", length: 10, unique: true)]
     #[Assert\NotBlank]
-    #[Assert\Length(max:10)]
+    #[Assert\Length(max: 10)]
     #[Groups(['category:read', 'category:write'])]
     private ?string $code = null;
 

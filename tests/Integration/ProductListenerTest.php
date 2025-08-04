@@ -3,8 +3,6 @@
 namespace App\Tests\Integration;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use App\Entity\Category;
-use App\Entity\Product;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\HttpFoundation\Response;

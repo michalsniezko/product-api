@@ -44,8 +44,8 @@ class Product
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: "products")]
-    #[ORM\JoinTable(name:"product_category")]
-    #[Assert\Count(min:1, minMessage:"Product must belong to at least one category.")]
+    #[ORM\JoinTable(name: "product_category")]
+    #[Assert\Count(min: 1, minMessage: "Product must belong to at least one category.")]
     #[Groups(['product:read', 'product:write'])]
     private Collection $categories;
 

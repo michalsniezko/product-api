@@ -1,5 +1,5 @@
 monolog:
-    channels: ['product']
+    channels: [ 'product' ]
 
     handlers:
         main:
@@ -10,4 +10,4 @@ monolog:
             type: stream
             path: '%kernel.logs_dir%/product.log'
             level: debug
-            channels: ['product']
+            channels: [ 'product' ]

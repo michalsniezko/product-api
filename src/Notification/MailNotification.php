@@ -13,9 +13,11 @@ readonly class MailNotification implements NotificationInterface
     public function __construct(
         private MailerInterface $mailer,
         private LoggerInterface $logger,
-        private string $fromEmail,
-        private string $toEmail
-    ) {}
+        private string          $fromEmail,
+        private string          $toEmail
+    )
+    {
+    }
 
     public function notify(string $subject, string $message): void
     {
