@@ -2,15 +2,13 @@
 
 namespace App\Tests;
 
-
 use App\Entity\Product;
 use App\EventListener\ProductListener;
+use App\Notification\Notifier;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
 class ProductListenerUnitTest extends TestCase
 {
@@ -24,15 +22,14 @@ class ProductListenerUnitTest extends TestCase
             ->method('info')
             ->with($this->stringContains('Product'));
 
-        $mailer = $this->createMock(MailerInterface::class);
-        $mailer->expects($this->once())
-            ->method('send')
-            ->with($this->callback(function ($email) {
-                return $email instanceof Email
-                    && str_contains($email->getSubject(), 'Product');
+        $notifier = $this->createMock(Notifier::class);
+        $notifier->expects($this->once())
+            ->method('notify')
+            ->with($this->callback(function ($message) {
+                return is_string($message) && str_contains($message, 'Product');
             }));
 
-        $listener = new ProductListener($logger, $mailer, 'from@test.com', 'to@test.com');
+        $listener = new ProductListener($logger, $notifier, 'from@test.com', 'to@test.com');
 
         $product = new Product();
         $product->setName('Test Product');
@@ -53,15 +50,14 @@ class ProductListenerUnitTest extends TestCase
             ->method('info')
             ->with($this->stringContains('Product'));
 
-        $mailer = $this->createMock(MailerInterface::class);
-        $mailer->expects($this->once())
-            ->method('send')
-            ->with($this->callback(function ($email) {
-                return $email instanceof Email
-                    && str_contains($email->getSubject(), 'Product');
+        $notifier = $this->createMock(Notifier::class);
+        $notifier->expects($this->once())
+            ->method('notify')
+            ->with($this->callback(function ($message) {
+                return is_string($message) && str_contains($message, 'Product');
             }));
 
-        $listener = new ProductListener($logger, $mailer, 'from@test.com', 'to@test.com');
+        $listener = new ProductListener($logger, $notifier, 'from@test.com', 'to@test.com');
 
         $product = new Product();
         $product->setName('Test Product');
@@ -71,5 +67,4 @@ class ProductListenerUnitTest extends TestCase
 
         $listener->postUpdate($eventArgs);
     }
-
 }
