@@ -1,51 +1,50 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\EventListener;
 
-
 use App\Entity\Product;
+use App\Entity\Category;
+use App\Enum\ProductStatus;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use App\Notification\Notifier;
 
-class ProductListener
+readonly class ProductListener
 {
-    private LoggerInterface $logger;
-    private MailerInterface $mailer;
-
-    public function __construct(LoggerInterface $logger, MailerInterface $mailer)
-    {
-        $this->logger = $logger;
-        $this->mailer = $mailer;
-    }
+    public function __construct(
+        private LoggerInterface $logger,
+        private Notifier $notifier
+    ) {}
 
     public function postPersist(LifecycleEventArgs $args): void
     {
-        $this->logAndNotify($args);
+        $this->handleEvent($args, ProductStatus::SAVED);
     }
 
     public function postUpdate(LifecycleEventArgs $args): void
     {
-        $this->logAndNotify($args);
+        $this->handleEvent($args, ProductStatus::UPDATED);
     }
 
-    private function logAndNotify(LifecycleEventArgs $args): void
+    private function handleEvent(LifecycleEventArgs $args, ProductStatus $status): void
     {
         $entity = $args->getObject();
+
         if (!$entity instanceof Product) {
             return;
         }
 
-        $this->logger->info(sprintf('Product %s has been saved.', $entity->getName()));
+        $action = $status->value;
+        $productName = $entity->getName();
+        $categories = implode(', ', array_map(fn (Category $c) => $c->getCode(), $entity->getCategories()->toArray()));
 
-        $email = (new Email())
-            ->from('no-reply@example.com')
-            ->to('admin@example.com')
-            ->subject('Product saved')
-            ->text(sprintf('Product "%s" has been saved.', $entity->getName()));
+        $message = sprintf('Product "%s" has been %s and belongs to categories: %s.', $productName, $action, $categories);
 
-         $this->mailer->send($email);
+        $this->logger->info($message);
+
+        $subject = "Product status update: $productName";
+        $this->notifier->notify($subject, $message);
     }
 }

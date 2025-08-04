@@ -27,8 +27,6 @@ services:
         image: mysql:8.4
         container_name: product-api-db
         restart: always
-        ports:
-            - "3306:3306"
         environment:
             MYSQL_DATABASE: app
             MYSQL_USER: symfony

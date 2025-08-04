@@ -32,7 +32,7 @@ class ProductListenerUnitTest extends TestCase
                     && str_contains($email->getSubject(), 'Product');
             }));
 
-        $listener = new ProductListener($logger, $mailer);
+        $listener = new ProductListener($logger, $mailer, 'from@test.com', 'to@test.com');
 
         $product = new Product();
         $product->setName('Test Product');
@@ -61,7 +61,7 @@ class ProductListenerUnitTest extends TestCase
                     && str_contains($email->getSubject(), 'Product');
             }));
 
-        $listener = new ProductListener($logger, $mailer);
+        $listener = new ProductListener($logger, $mailer, 'from@test.com', 'to@test.com');
 
         $product = new Product();
         $product->setName('Test Product');

@@ -1,10 +1,28 @@
+parameters:
+    mail_from: '%env(MAIL_FROM)%'
+    mail_to: '%env(MAIL_TO)%'
+
 services:
     _defaults:
         autowire: true
         autoconfigure: true
     App\:
         resource: '../src/'
+
+    App\Notification\MailNotification:
+        arguments:
+            $fromEmail: '%env(MAIL_FROM)%'
+            $toEmail: '%env(MAIL_TO)%'
+
+    App\Notification\Notifier:
+        arguments:
+            $channels:
+                - '@App\Notification\MailNotification'
+
     App\EventListener\ProductListener:
+        arguments:
+            $logger: '@logger'
+            $notifier: '@App\Notification\Notifier'
         tags:
             - { name: doctrine.event_listener, event: postPersist }
             - { name: doctrine.event_listener, event: postUpdate }
