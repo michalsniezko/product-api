@@ -21,7 +21,7 @@ services:
 
     App\EventListener\ProductListener:
         arguments:
-            $logger: '@logger'
+            $logger: '@monolog.logger.product'
             $notifier: '@App\Notification\Notifier'
         tags:
             - { name: doctrine.event_listener, event: postPersist }

@@ -42,11 +42,7 @@ class Category
 
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: "categories")]
     #[Groups('category:read')]
-    private Collection $products {
-        get {
-            return $this->products;
-        }
-    }
+    private Collection $products;
 
     public function addProduct(Product $product): self
     {
@@ -118,5 +114,10 @@ class Category
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getProducts(): Collection
+    {
+        return $this->products;
     }
 }
