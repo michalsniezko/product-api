@@ -2,13 +2,16 @@
 
 namespace App\Tests\Unit;
 
+use App\Entity\Category;
 use App\Entity\Product;
 use App\EventListener\ProductListener;
-use App\Notification\Notifier;
+use App\Message\NotificationMessage;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ProductListenerUnitTest extends TestCase
 {
@@ -22,17 +25,21 @@ class ProductListenerUnitTest extends TestCase
             ->method('info')
             ->with($this->stringContains('Product'));
 
-        $notifier = $this->createMock(Notifier::class);
-        $notifier->expects($this->once())
-            ->method('notify')
-            ->with($this->callback(function ($message) {
-                return is_string($message) && str_contains($message, 'Product');
-            }));
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects($this->once())
+            ->method('dispatch')
+            ->with($this->callback(fn($message) => $message instanceof NotificationMessage
+                && str_contains($message->subject, 'Product')
+                && str_contains($message->message, 'Product')))
+            ->willReturnCallback(fn($message) => new Envelope($message));
 
-        $listener = new ProductListener($logger, $notifier, 'from@test.com', 'to@test.com');
+        $listener = new ProductListener($logger, $messageBus);
 
         $product = new Product();
         $product->setName('Test Product');
+
+        $category = new Category();
+        $category->setCode('TEST-CAT');
 
         $eventArgs = $this->createMock(LifecycleEventArgs::class);
         $eventArgs->method('getObject')->willReturn($product);
@@ -50,17 +57,21 @@ class ProductListenerUnitTest extends TestCase
             ->method('info')
             ->with($this->stringContains('Product'));
 
-        $notifier = $this->createMock(Notifier::class);
-        $notifier->expects($this->once())
-            ->method('notify')
-            ->with($this->callback(function ($message) {
-                return is_string($message) && str_contains($message, 'Product');
-            }));
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects($this->once())
+            ->method('dispatch')
+            ->with($this->callback(fn($message) => $message instanceof NotificationMessage
+                && str_contains($message->subject, 'Product')
+                && str_contains($message->message, 'Product')))
+            ->willReturnCallback(fn($message) => new Envelope($message));
 
-        $listener = new ProductListener($logger, $notifier, 'from@test.com', 'to@test.com');
+        $listener = new ProductListener($logger, $messageBus);
 
         $product = new Product();
         $product->setName('Test Product');
+
+        $category = new Category();
+        $category->setCode('TEST-CAT');
 
         $eventArgs = $this->createMock(LifecycleEventArgs::class);
         $eventArgs->method('getObject')->willReturn($product);

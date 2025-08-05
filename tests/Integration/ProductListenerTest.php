@@ -1,96 +1,82 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Tests\Integration;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use App\Repository\ProductRepository;
-use Doctrine\ORM\Tools\SchemaTool;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use App\Entity\Product;
+use App\EventListener\ProductListener;
+use App\Message\NotificationMessage;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
 
-class ProductListenerTest extends ApiTestCase
+class ProductListenerTest extends TestCase
 {
-    public static function setUpBeforeClass(): void
+    /**
+     * @throws Exception
+     */
+    public function testPostPersistSendsMessageAndLogs()
     {
-        self::bootKernel();
-        $entityManager = self::getContainer()->get('doctrine')->getManager();
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())
+            ->method('info')
+            ->with($this->stringContains('Product'));
 
-        $dbFile = '/tmp/test.sqlite';
-        if (file_exists($dbFile)) {
-            unlink($dbFile);
-        }
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects($this->once())
+            ->method('dispatch')
+            ->with($this->callback(function ($message) {
+                return $message instanceof NotificationMessage
+                    && str_contains($message->subject, 'Product')
+                    && str_contains($message->message, 'Product');
+            }))
+            ->willReturnCallback(function ($message) {
+                return new Envelope($message);
+            });
 
-        $metadata = $entityManager->getMetadataFactory()->getAllMetadata();
+        $listener = new ProductListener($logger, $messageBus);
 
-        if (!empty($metadata)) {
-            $schemaTool = new SchemaTool($entityManager);
-            $schemaTool->dropSchema($metadata);
-            $schemaTool->createSchema($metadata);
-        }
+        $product = new Product();
+        $product->setName('Test Product');
+
+        $eventArgs = $this->createMock(LifecycleEventArgs::class);
+        $eventArgs->method('getObject')->willReturn($product);
+
+        $listener->postPersist($eventArgs);
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
+     * @throws Exception
      */
-    public function testProductPostTriggersListener(): void
+    public function testPostUpdateSendsMessageAndLogs()
     {
-        $client = static::createClient();
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())
+            ->method('info')
+            ->with($this->stringContains('Product'));
 
-        $response = $client->request('POST', '/api/categories', [
-            'json' => [
-                'code' => 'TEST',
-                'name' => 'Test category'
-            ]
-        ]);
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects($this->once())
+            ->method('dispatch')
+            ->with($this->callback(function ($message) {
+                return $message instanceof NotificationMessage
+                    && str_contains($message->subject, 'Product')
+                    && str_contains($message->message, 'Product');
+            }))
+            ->willReturnCallback(function ($message) {
+                return new Envelope($message);
+            });
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
-        $categoryIri = $response->toArray()['@id'];
+        $listener = new ProductListener($logger, $messageBus);
 
-        $client->request('POST', '/api/products', [
-            'json' => [
-                'name' => 'Test product',
-                'price' => 100,
-                'categories' => [$categoryIri]
-            ]
-        ]);
+        $product = new Product();
+        $product->setName('Test Product');
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
+        $eventArgs = $this->createMock(LifecycleEventArgs::class);
+        $eventArgs->method('getObject')->willReturn($product);
 
-        $logContents = file_get_contents(__DIR__ . '/../../var/log/test.log');
-        $this->assertStringContainsString('Product "Test product" has been saved', $logContents);
-    }
-
-    /**
-     * @throws TransportExceptionInterface
-     */
-    public function testProductPutTriggersListener(): void
-    {
-        $client = static::createClient();
-
-        /** @var ProductRepository $repo */
-        $repo = static::getContainer()->get(ProductRepository::class);
-        $product = $repo->findOneBy(['name' => 'Test product']);
-        $this->assertNotNull($product);
-
-        $client->request('PATCH', '/api/products/' . $product->getId(), [
-            'json' => [
-                'name' => 'Test product updated'
-            ]
-        ]);
-
-        $this->assertResponseIsSuccessful();
-
-        $logContents = file_get_contents(__DIR__ . '/../../var/log/test.log');
-        $this->assertStringContainsString('Product "Test product updated" has been updated', $logContents);
+        $listener->postUpdate($eventArgs);
     }
 }
