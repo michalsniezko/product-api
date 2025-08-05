@@ -1,19 +1,52 @@
-Make sure you have `make` installed (or `cmake` for Windows) for quick setup.
+# Product API – Symfony + Docker
 
-To run project:
+A simple Symfony API application with product and category management, email notifications, and async message queue.
 
-1. Run `make setup` in the project root directory
-2. Visit http://localhost:8080/api in your browser or use Postman/Insomnia to test API calls
-3. Visit http://localhost:8025/ in your browser to verify that emails are being sent after adding Products
-4. See `var/log/product.log` for logs related to products.
-5. Run tests: `make test` in the project root directory
-6. You can connect to DB exposed on port `3306`
+---
 
-See working application:
+## Requirements
 
-Perform a request to POST a new Category:
+- `make` (or `cmake` on Windows)
+- Docker + Docker Compose
 
-```http request
+---
+
+## Getting Started
+
+1. Run setup:
+
+   ```bash
+   make setup
+   ```
+
+2. Open the API in your browser or API client:
+   - http://localhost:8080/api
+
+3. Open MailHog to check emails:
+   - http://localhost:8025/
+
+4. Check logs:
+
+   ```bash
+   cat var/log/product.log
+   ```
+
+5. Run tests:
+
+   ```bash
+   make test
+   ```
+
+6. Connect to the database:
+   - Exposed on port `3306`
+
+---
+
+## Try It Out
+
+### Create a Category
+
+```http
 POST /api/categories HTTP/1.1
 Host: localhost
 Content-Type: application/json
@@ -23,9 +56,9 @@ Content-Type: application/json
 }
 ```
 
-Then perform a request to POST a new Product:
+### Create a Product
 
-```http request
+```http
 POST /api/products HTTP/1.1
 Host: localhost
 Content-Type: application/json
@@ -35,16 +68,25 @@ Content-Type: application/json
   "price": 123.45,
   "categories": ["/api/categories/1", "/api/categories/2"]
 }
-
 ```
 
-Prices are kept in cents (lowest currency possible).
-A Currency column could be implemented additionally if needed.
+---
 
-Emails (from and to) are defined in .env.
+## Notes
 
-More notification channels (Slack, SMS) can be added by implementing NotificationInterface and registering services
-as additional `$channels` for Notifier in `services.yaml`.
+- Prices are stored in cents (lowest possible currency unit).
+- A separate currency column can be added if needed.
+- Emails (FROM and TO) are configured in the `.env` file.
 
-Sending notifications is done via async Messenger queue.
+---
+
+## Notifications
+
+- Notifications are sent asynchronously via Symfony Messenger.
+- Channels can include:
+  - Email (default)
+  - Slack, SMS, etc. — just implement `NotificationInterface`
+- To register custom channels:
+  - Define them as services
+  - Inject into the `Notifier` via `services.yaml`
 
