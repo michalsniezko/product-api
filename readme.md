@@ -7,6 +7,7 @@ To run project:
 3. Visit http://localhost:8025/ in your browser to verify that emails are being sent after adding Products
 4. See `var/log/product.log` for logs related to products.
 5. Run tests: `make test` in the project root directory
+6. You can connect to DB exposed on port `3306`
 
 See working application:
 
@@ -46,3 +47,4 @@ More notification channels (Slack, SMS) can be added by implementing Notificatio
 as additional `$channels` for Notifier in `services.yaml`.
 
 Sending notifications is done via async Messenger queue.
+
