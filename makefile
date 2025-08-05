@@ -2,6 +2,13 @@ DOCKER_COMPOSE=docker compose -f docker/docker-compose.yml
 PHP_SERVICE=php
 PROJECT_DIR=/var/www/html
 
+wait-for-db:
+	@echo "Waiting for DB..."
+	@until docker exec product-api-php php -r "try { new PDO('mysql:host=db;dbname=app', 'symfony', 'symfony'); } catch (Exception $${e}) { exit(1); }"; do \
+		sleep 1; \
+	done
+	@echo "DB ready!"
+
 up:
 	$(DOCKER_COMPOSE) up -d
 
@@ -14,7 +21,7 @@ logs:
 composer-install:
 	$(DOCKER_COMPOSE) exec -T $(PHP_SERVICE) composer install
 
-db-create:
+db-create: wait-for-db
 	$(DOCKER_COMPOSE) exec -T $(PHP_SERVICE) php $(PROJECT_DIR)/bin/console doctrine:database:create --if-not-exists
 
 migrate:
