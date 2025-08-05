@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Entity(repositoryClass: CategoryRepository::class)]
 #[UniqueEntity(fields: ['code'], message: 'This code already exists.')]
 #[HasLifecycleCallbacks]
-class Category
+class Category extends TimestampEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,14 +31,6 @@ class Category
     #[Assert\Length(max: 10)]
     #[Groups(['category:read', 'category:write'])]
     private ?string $code = null;
-
-    #[ORM\Column]
-    #[Groups('category:read')]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    #[Groups('category:read')]
-    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: "categories")]
     #[Groups('category:read')]
@@ -72,43 +64,6 @@ class Category
         $this->code = $code;
 
         return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
-    #[ORM\PrePersist]
-    public function onPrePersist(): void
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    #[ORM\PreUpdate]
-    public function onPreUpdate(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
