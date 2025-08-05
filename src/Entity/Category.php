@@ -24,13 +24,13 @@ class Category extends TimestampEntity
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private readonly ?int $id;
 
     #[ORM\Column(type: "string", length: 10, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 10)]
     #[Groups(['category:read', 'category:write'])]
-    private ?string $code = null;
+    private ?string $code;
 
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: "categories")]
     #[Groups('category:read')]

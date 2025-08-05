@@ -22,18 +22,18 @@ class Product extends TimestampEntity
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['product:read'])]
-    private ?int $id = null;
+    private readonly ?int $id;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Groups(['product:read', 'product:write'])]
-    private ?string $name = null;
+    private ?string $name;
 
     #[ORM\Column]
     #[Assert\NotNull]
     #[Assert\Positive]
     #[Groups(['product:read', 'product:write'])]
-    private ?float $price = null;
+    private ?int $price;
 
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: "products")]
     #[ORM\JoinTable(name: "product_category")]
@@ -86,12 +86,12 @@ class Product extends TimestampEntity
         return $this;
     }
 
-    public function getPrice(): ?float
+    public function getPrice(): int
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): static
+    public function setPrice(int $price): static
     {
         $this->price = $price;
 

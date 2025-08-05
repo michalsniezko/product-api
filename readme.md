@@ -36,6 +36,8 @@ Content-Type: application/json
 }
 
 ```
+Prices are kept in cents (lowest currency possible). 
+A Currency column could be implemented additionally if needed.
 
 Emails (from and to) are defined in .env.
 
