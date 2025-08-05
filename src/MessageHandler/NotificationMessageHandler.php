@@ -10,7 +10,9 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 readonly class NotificationMessageHandler
 {
-    public function __construct(private Notifier $notifier) {}
+    public function __construct(private Notifier $notifier)
+    {
+    }
 
     public function __invoke(NotificationMessage $message): void
     {

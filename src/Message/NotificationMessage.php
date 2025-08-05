@@ -8,5 +8,7 @@ class NotificationMessage
     public function __construct(
         public string $subject,
         public string $message
-    ) {}
+    )
+    {
+    }
 }

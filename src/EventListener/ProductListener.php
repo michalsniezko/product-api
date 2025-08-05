@@ -8,7 +8,6 @@ use App\Entity\Category;
 use App\Entity\Product;
 use App\Enum\ProductStatus;
 use App\Message\NotificationMessage;
-use App\Notification\Notifier;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
@@ -17,7 +16,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 readonly class ProductListener
 {
     public function __construct(
-        private LoggerInterface $logger,
+        private LoggerInterface     $logger,
         private MessageBusInterface $messageBus,
     )
     {
