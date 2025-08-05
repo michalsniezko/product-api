@@ -7,15 +7,18 @@ namespace App\EventListener;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Enum\ProductStatus;
+use App\Message\NotificationMessage;
 use App\Notification\Notifier;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 readonly class ProductListener
 {
     public function __construct(
         private LoggerInterface $logger,
-        private Notifier        $notifier
+        private MessageBusInterface $messageBus,
     )
     {
     }
@@ -42,7 +45,12 @@ readonly class ProductListener
         $this->logger->info($message);
 
         $subject = "Product status update: $productName";
-        $this->notifier->notify($subject, $message);
+
+        try {
+            $this->messageBus->dispatch(new NotificationMessage($subject, $message));
+        } catch (ExceptionInterface $e) {
+            $this->logger->error('Error dispatching notification message: ' . $e->getMessage());
+        }
     }
 
     public function postUpdate(LifecycleEventArgs $args): void

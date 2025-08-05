@@ -41,6 +41,23 @@ services:
         ports:
             - "1025:1025"
             - "8025:8025"
+
+    messenger_worker:
+        build:
+            context: ./php
+        container_name: product-api-worker
+        volumes:
+            - ../:/var/www/html:cached
+        working_dir: /var/www/html
+        environment:
+            APP_ENV: dev
+        depends_on:
+            - db
+            - php
+        command: >
+            php bin/console messenger:consume async --time-limit=3600 --memory-limit=256M -vv
+
+
 volumes:
     db_data:
     var_cache:

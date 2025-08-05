@@ -41,3 +41,5 @@ Emails (from and to) are defined in .env.
 
 More notification channels (Slack, SMS) can be added by implementing NotificationInterface and registering services
 as additional `$channels` for Notifier in `services.yaml`.
+
+Sending notifications is done via async Messenger queue.
