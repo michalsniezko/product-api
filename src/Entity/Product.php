@@ -24,7 +24,7 @@ class Product extends TimestampEntity
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['product:read'])]
-    private readonly ?int $id;
+    private ?int $id;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
